@@ -37,20 +37,21 @@ modifyNNData()
     cp $KAIACODE/build/packaging/linux/$CONF_DIR $CONF_DIR
     cp $KAIACODE/build/packaging/linux/$DAEMON_DIR $DAEMON_DIR
 
-    sed -i '' "s/NETWORK=.*/#NETWORK=/g" $CONF_DIR
-    sed -i '' "s/NETWORK_ID=.*/NETWORK_ID="$NETWORK_ID"/g" $CONF_DIR
-    sed -i '' "s/PORT=32323/PORT="$PORT"/g" $CONF_DIR
-    sed -i '' "s/RPC_ENABLE=.*/RPC_ENABLE=1/g" $CONF_DIR
-    sed -i '' "s/RPC_API=.*/RPC_API=\"admin,debug,kaia,miner,net,personal,rpc,txpool,web3,eth,istanbul,governance\"/g" $CONF_DIR
-    sed -i '' "s/RPC_PORT=.*/RPC_PORT="$RPC_PORT"/g" $CONF_DIR
-    sed -i '' "s/WS_ENABLE=.*/WS_ENABLE=1/g" $CONF_DIR
-    sed -i '' "s/WS_API=.*/WS_API=\"admin,debug,kaia,miner,net,personal,rpc,txpool,web3,eth,istanbul,governance\"/g" $CONF_DIR
-    sed -i '' "s/WS_PORT=.*/WS_PORT="$WS_PORT"/g" $CONF_DIR
-    sed -i '' "s/AUTO_RESTART=.*/AUTO_RESTART=1/g" $CONF_DIR
-    sed -i '' "s/METRICS=.*/METRICS=1/g" $CONF_DIR
-    sed -i '' "s/PROMETHEUS=.*/PROMETHEUS=1/g" $CONF_DIR
-    sed -i '' "s/MULTICHANNEL=.*/MULTICHANNEL=1/g" $CONF_DIR
-    sed -i '' "s|DATA_DIR=.*|DATA_DIR=${HOMEDIR}/${NODE_TYPE}${num}/data|g" ${CONF_DIR}
+    sed -i.bak "s/NETWORK=.*/#NETWORK=/g" $CONF_DIR
+    sed -i.bak "s/NETWORK_ID=.*/NETWORK_ID="$NETWORK_ID"/g" $CONF_DIR
+    sed -i.bak "s/PORT=32323/PORT="$PORT"/g" $CONF_DIR
+    sed -i.bak "s/RPC_ENABLE=.*/RPC_ENABLE=1/g" $CONF_DIR
+    sed -i.bak "s/RPC_API=.*/RPC_API=\"admin,debug,kaia,miner,net,personal,rpc,txpool,web3,eth,istanbul,governance\"/g" $CONF_DIR
+    sed -i.bak "s/RPC_PORT=.*/RPC_PORT="$RPC_PORT"/g" $CONF_DIR
+    sed -i.bak "s/WS_ENABLE=.*/WS_ENABLE=1/g" $CONF_DIR
+    sed -i.bak "s/WS_API=.*/WS_API=\"admin,debug,kaia,miner,net,personal,rpc,txpool,web3,eth,istanbul,governance\"/g" $CONF_DIR
+    sed -i.bak "s/WS_PORT=.*/WS_PORT="$WS_PORT"/g" $CONF_DIR
+    sed -i.bak "s/AUTO_RESTART=.*/AUTO_RESTART=1/g" $CONF_DIR
+    sed -i.bak "s/METRICS=.*/METRICS=1/g" $CONF_DIR
+    sed -i.bak "s/PROMETHEUS=.*/PROMETHEUS=1/g" $CONF_DIR
+    sed -i.bak "s/MULTICHANNEL=.*/MULTICHANNEL=1/g" $CONF_DIR
+    sed -i.bak "s|DATA_DIR=.*|DATA_DIR=${HOMEDIR}/${NODE_TYPE}${num}/data|g" ${CONF_DIR}
+
 
     if [ $NODE_TYPE = "cn" ]; then
       # copy nodekey & keystore & passwd file from homi-output to cn dir
@@ -59,16 +60,17 @@ modifyNNData()
       cp ../homi-output/keys/passwd$num conf/pwd.txt
       echo "" >> conf/pwd.txt
       # set REWARDBASE and unlock at kcnd.conf
-      sed -i '' "s/REWARDBASE=.*/REWARDBASE=\""`cat ../homi-output/keys/reward$num`"\"/g" $CONF_DIR
+      sed -i.bak "s/REWARDBASE=.*/REWARDBASE=\""`cat ../homi-output/keys/reward$num`"\"/g" $CONF_DIR
       # set proper port number at static-nodes.json
-      sed -i '' $((num+1))"s/:"$((32323+PORT_BASE+num-1))"/:"$PORT"/g" ../homi-output/scripts/static-nodes.json
+      sed -i.bak $((num+1))"s/:"$((32323+PORT_BASE+num-1))"/:"$PORT"/g" ../homi-output/scripts/static-nodes.json
     elif [ $NODE_TYPE = "pn" ]; then
       # copy nodekey from homi-output to pn dir
       cp ../homi-output/keys_pn/nodekey$num data/klay/nodekey
       # set proper port number at static-nodes.json
-      sed -i '' $((num+1))"s/:"$((32323+PORT_BASE+num-1))"/:"$PORT"/g" ../homi-output/scripts_pn/static-nodes.json
+      sed -i.bak $((num+1))"s/:"$((32323+PORT_BASE+num-1))"/:"$PORT"/g" ../homi-output/scripts_pn/static-nodes.json
     fi
 
+    rm "$CONF_DIR.bak"
     cd ..
   done
 
@@ -127,7 +129,8 @@ setupTestAccount()
       str=`seq -s, 0 $UNLOCKACCS`
       str=${str:0:$((${#str}-3))}
       str="ADDITIONAL=\"--unlock "$str" --password "$NODEDIR/conf/pwd.txt"\""
-      sed -i '' "s|ADDITIONAL=.*|$str|" $NODEDIR/conf/k${NODE_TYPE}d.conf
+      sed -i.bak "s|ADDITIONAL=.*|$str|" $NODEDIR/conf/k${NODE_TYPE}d.conf
+      rm "$NODEDIR/conf/k${NODE_TYPE}d.conf.bak"
     done
 }
 
@@ -140,7 +143,8 @@ configureRemixCors()
   fi
   CONF_DIR=$HOMEDIR"/${NODETYPE}1/conf/k${NODETYPE}d.conf"
   echo "ADDITIONAL=\"--vmdebug \$ADDITIONAL\"" >> $CONF_DIR
-  sed -i '' "s/RPC_CORSDOMAIN=.*/RPC_CORSDOMAIN=https:\/\/remix.ethereum.org/g" $CONF_DIR
+  sed -i.bak "s/RPC_CORSDOMAIN=.*/RPC_CORSDOMAIN=https:\/\/remix.ethereum.org/g" $CONF_DIR
+  rm "$CONF_DIR"
 }
 
 deploy()
@@ -180,7 +184,8 @@ deploy()
 
     rm -rf homi-output-tmp
   fi
-  sed -i '' "s/\"chainId\".*/\"chainId\": "$NETWORK_ID",/g" homi-output/scripts/genesis.json
+  sed -i.bak "s/\"chainId\".*/\"chainId\": "$NETWORK_ID",/g" homi-output/scripts/genesis.json
+  rm "homi-output/scripts/genesis.json.bak"
 
   modifyNNData "cn" $NUMOFCN 0
   modifyNNData "pn" $NUMOFPN $NUMOFCN
