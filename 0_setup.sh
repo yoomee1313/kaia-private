@@ -127,7 +127,11 @@ setupTestAccount()
         UNLOCKACCS=$NUMOFTESTACCSPERNODE
       fi
       str=`seq -s, 0 $UNLOCKACCS`
-      str=${str:0:$((${#str}-3))}
+      # Remove trailing comma if it exists
+      if [[ $str == *, ]]; then
+        str=${str%,}
+      fi
+      str=${str:0:$((${#str}-2))}
       str="ADDITIONAL=\"--unlock "$str" --password "$NODEDIR/conf/pwd.txt"\""
       sed -i.bak "s|ADDITIONAL=.*|$str|" $NODEDIR/conf/k${NODE_TYPE}d.conf
       rm "$NODEDIR/conf/k${NODE_TYPE}d.conf.bak"
