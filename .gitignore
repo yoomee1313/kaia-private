@@ -7,5 +7,6 @@ sen*/
 nodekeydir/
 homi-output/
 homi
+prometheus
 .DS_Store
 .idea/

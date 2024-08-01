@@ -47,8 +47,8 @@ modifyNNData()
     sed -i.bak "s/WS_API=.*/WS_API=\"admin,debug,kaia,miner,net,personal,rpc,txpool,web3,eth,istanbul,governance\"/g" $CONF_DIR
     sed -i.bak "s/WS_PORT=.*/WS_PORT="$WS_PORT"/g" $CONF_DIR
     sed -i.bak "s/AUTO_RESTART=.*/AUTO_RESTART=1/g" $CONF_DIR
-    sed -i.bak "s/METRICS=.*/METRICS=1/g" $CONF_DIR
-    sed -i.bak "s/PROMETHEUS=.*/PROMETHEUS=1/g" $CONF_DIR
+    sed -i.bak "s/METRICS=.*/METRICS=0/g" $CONF_DIR
+    sed -i.bak "s/PROMETHEUS=.*/PROMETHEUS=0/g" $CONF_DIR
     sed -i.bak "s/MULTICHANNEL=.*/MULTICHANNEL=1/g" $CONF_DIR
     sed -i.bak "s|DATA_DIR=.*|DATA_DIR=${HOMEDIR}/${NODE_TYPE}${num}/data|g" ${CONF_DIR}
 
@@ -148,7 +148,24 @@ configureRemixCors()
   CONF_DIR=$HOMEDIR"/${NODETYPE}1/conf/k${NODETYPE}d.conf"
   echo "ADDITIONAL=\"--vmdebug \$ADDITIONAL\"" >> $CONF_DIR
   sed -i.bak "s/RPC_CORSDOMAIN=.*/RPC_CORSDOMAIN=https:\/\/remix.ethereum.org/g" $CONF_DIR
-  rm "$CONF_DIR"
+  rm "$CONF_DIR"".bak"
+}
+
+configurePrometheus()
+{
+    NODE_TYPE=$1
+    NUM_OF_NODE=$2
+    PORT_BASE=$3
+    CONF_DIR=$HOMEDIR"/${NODE_TYPE}1/conf/k${NODE_TYPE}d.conf"
+
+    for ((num = 1; num <= NUM_OF_NODE; num++))
+    do
+      PROMETHEUS_PORT=$(( 61001 + PORT_BASE + num - 1))
+      sed -i.bak "s|^ADDITIONAL=.*|& --prometheusport $PROMETHEUS_PORT|" $CONF_DIR
+      sed -i.bak "s/METRICS=.*/METRICS=1/g" $CONF_DIR
+      sed -i.bak "s/PROMETHEUS=.*/PROMETHEUS=1/g" $CONF_DIR
+    done
+    rm "$CONF_DIR"".bak"
 }
 
 deploy()
@@ -203,6 +220,12 @@ deploy()
 
   if [[ $ENFORREMIX = "true" ]]; then
     configureRemixCors
+  fi
+
+  if [[ $MONITORING = "true" ]]; then
+    configurePrometheus "cn" $NUMOFCN 0
+    configurePrometheus "pn" $NUMOFPN NUMOFTESTACCSPERNODE*NUMOFCN
+    configurePrometheus "en" $NUMOFEN NUMOFTESTACCSPERNODE*NUMOFCN+NUMOFTESTACCSPERNODE*NUMOFPN
   fi
 }
 

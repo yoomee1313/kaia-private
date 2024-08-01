@@ -1,6 +1,6 @@
 # setup directories
 KAIACODE=$HOME/workdir/kaia
-HOMEDIR=$HOME/workdir/kaia-private
+HOMEDIR=$HOME/homedir/kaia_private
 
 # setup some options
 NETWORK_ID=292929 # put random NETWORK_ID
@@ -8,6 +8,8 @@ NUMOFCN=1
 NUMOFPN=1
 NUMOFEN=1
 NUMOFTESTACCSPERNODE=1
+DBTYPE="LevelDB"
+MONITORING=true
 
 # remix option
 REMIX=true # if this is true, set the cors field of the EN to use remix. If EN not available, CN will be used for remix.
