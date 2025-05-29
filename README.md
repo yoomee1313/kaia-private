@@ -1,3 +1,6 @@
+# ARCHIVED
+This repo is archived. Please use https://github.com/kaiachain/kaiaspray/tree/main/local-deploy instead.
+
 # kaia-private
 easy launching a private network of kaia (macOS)
 
